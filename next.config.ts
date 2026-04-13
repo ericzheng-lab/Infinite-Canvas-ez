@@ -1,81 +1,62 @@
 import type { NextConfig } from "next";
 
-// The problematic import is removed.
-
 const nextConfig: NextConfig = {
-
-
-  /* config options here */
   async redirects() {
-    return [
-
-    ];
+    return [];
   },
-  compiler: {
-    // removeConsole: process.env.NODE_ENV === "production" ? { exclude: ['error', 'warn', 'debug'] }
-    //   : false
-  },
+  compiler: {},
   async headers() {
-    return [
-      {
-        source: '/(.*)?', // Matches all pages
-
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          }
-        ]
-      }
-    ]
+    return [{
+      source: '/(.*)?',
+      headers: [{ key: 'X-Frame-Options', value: 'DENY' }]
+    }];
   },
   experimental: {
-    serverActions: {
-      bodySizeLimit: '4mb',
-    
-    },
+    serverActions: { bodySizeLimit: '4mb' },
   },
   images: {
-    // Add your image domain here use for nextjs Image componetes
-    remotePatterns: [
-
-    ],
+    remotePatterns: [],
   },
-
   serverExternalPackages: ['@aws-sdk/client-s3', '@aws-sdk/s3-request-presigner'],
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
-      config.resolve = {
-        ...config.resolve,
-        fallback: {
-          net: false,
-          dns: false,
-          tls: false,
-          assert: false,
-
-          path: false,
-          fs: false,
-
-          events: false,
-
-          process: false,
-
-        }
+      config.resolve.fallback = {
+        net: false, dns: false, tls: false, assert: false,
+        path: false, fs: false, events: false, process: false,
+      };
+      // Split chunks to stay under 25MB Cloudflare Pages limit
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 5 * 1024 * 1024,
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            commons: {
+              name: 'commons',
+              chunks: 'all',
+              minChunks: 2,
+            },
+            lib: {
+              test: /[\\/]node_modules[\\/]/,
+              name(module: any) {
+                const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)?.[1];
+                return `npm.${packageName?.replace('@', '')}`;
+              },
+              priority: 10,
+            },
+          },
+        },
       };
     }
     config.plugins.push(new webpack.NormalModuleReplacementPlugin(/node:/, (resource: any) => {
-      resource.request = resource.request.replace(/^node:/, "");
-    }))
-    // ignore replicate warning
-    // config.ignoreWarnings = config.ignoreWarnings || [];
-    // config.ignoreWarnings.push({
-    //   module: /replicate/,
-    //   message: /require function is used in a way in which dependencies cannot be statically extracted/,
-    // });
+      resource.request = resource.request.replace(/^node:/, '');
+    }));
     config.resolve.alias.canvas = false;
     config.resolve.alias.encoding = false;
-
-    return config
+    return config;
   },
 };
 
