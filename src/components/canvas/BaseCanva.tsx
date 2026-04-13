@@ -90,9 +90,19 @@ export default function MinimalInfiniteCanvas({ className = "", containerHeight 
   const isMobile = useIsMobile();
   /* ----------------------- user data ralated ----------------------- */
   const tempFalApiKey = useSettingValue<string>("falApiKey");
+  const tempMjApiKey = useSettingValue<string>("mjApiKey") || '';
+  const tempMjBaseUrl = useSettingValue<string>("mjBaseUrl") || 'https://api.midjourney.com';
+  const tempSeedApiKey = useSettingValue<string>("seedApiKey") || '';
+  const tempSeedBaseUrl = useSettingValue<string>("seedBaseUrl") || 'https://api.seedream.vip';
+  const tempBltcyApiKey = useSettingValue<string>("bltcyApiKey") || '';
   const handle_options = {
     isClient: true,
     customApiKey: tempFalApiKey,
+    mjApiKey: tempMjApiKey,
+    mjBaseUrl: tempMjBaseUrl,
+    seedApiKey: tempSeedApiKey,
+    seedBaseUrl: tempSeedBaseUrl,
+    bltcyApiKey: tempBltcyApiKey,
   }
 
 
