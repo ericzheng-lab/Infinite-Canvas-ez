@@ -1062,6 +1062,172 @@ const other_series_image_model: ModelSeriesSetting[] = [
         }
     },
 ]
+const midjourney_series_image_model: ModelSeriesSetting[] = [
+    {
+        id: "midjourney-fast",
+        label: "Midjourney Fast",
+        description: "Fast mode Midjourney image generation",
+        supportedAspectRatios: ["1:1", "2:3", "3:2", "16:9", "9:16"],
+        tag: ["Text to Image"],
+        badge: [],
+        type: 'image',
+        provider: ['midjourney'],
+        useCredits: 0,
+        apiInput: {
+            provider: 'midjourney',
+            endpoint: '/mj/submit/imagine',
+            rules: [
+                { to: 'prompt', from: ['prompt_process', 'prompt'], transform: [{ op: 'coalesce' }] },
+            ]
+        }
+    },
+    {
+        id: "midjourney-relax",
+        label: "Midjourney Relax",
+        description: "Relax mode Midjourney image generation",
+        supportedAspectRatios: ["1:1", "2:3", "3:2", "16:9", "9:16"],
+        tag: ["Text to Image"],
+        badge: [],
+        type: 'image',
+        provider: ['midjourney'],
+        useCredits: 0,
+        apiInput: {
+            provider: 'midjourney',
+            endpoint: '/mj/submit/imagine',
+            rules: [
+                { to: 'prompt', from: ['prompt_process', 'prompt'], transform: [{ op: 'coalesce' }] },
+            ]
+        }
+    },
+    {
+        id: "midjourney-blend",
+        label: "Midjourney Blend",
+        description: "Blend multiple images with Midjourney",
+        tag: ["Image to Image"],
+        badge: ["Image Edit"],
+        type: 'image',
+        provider: ['midjourney'],
+        useCredits: 0,
+        supportAddFiles: [
+            {
+                name: "control_images",
+                label: "Images",
+                type: "image",
+                isRequired: true,
+                isSupport: 5,
+            },
+        ],
+        apiInput: {
+            provider: 'midjourney',
+            endpoint: '/mj/submit/blend',
+            rules: [
+                { to: 'dimensions', const: 'SQUARE' },
+            ]
+        }
+    },
+]
+const seedream_series_image_model: ModelSeriesSetting[] = [
+    {
+        id: "seedream-text2img",
+        label: "Seedream Text2Img",
+        description: "High-quality text to image generation",
+        supportedAspectRatios: ["1:1", "2:3", "3:2", "16:9", "9:16", "4:3", "3:4"],
+        tag: ["Text to Image"],
+        badge: [],
+        type: 'image',
+        provider: ['seedream'],
+        useCredits: 0,
+        apiInput: {
+            provider: 'seedream',
+            endpoint: '/v1/text2img',
+            rules: [
+                { to: 'prompt', from: ['prompt_process', 'prompt'], transform: [{ op: 'coalesce' }] },
+                { to: 'aspect_ratio', from: 'aspect_ratio', transform: [{ op: 'default', value: '1:1' }] },
+                { to: 'resolution', const: '1024x1024' },
+            ]
+        }
+    },
+    {
+        id: "seedream-img2img",
+        label: "Seedream Img2Img",
+        description: "Image to image generation with Seedream",
+        tag: ["Image to Image"],
+        badge: ["Image Edit"],
+        type: 'image',
+        provider: ['seedream'],
+        useCredits: 0,
+        supportAddFiles: [
+            {
+                name: "control_images",
+                label: "Reference Image",
+                type: "image",
+                isRequired: true,
+                isSupport: 1,
+            },
+        ],
+        apiInput: {
+            provider: 'seedream',
+            endpoint: '/v1/img2img',
+            rules: [
+                { to: 'prompt', from: ['prompt_process', 'prompt'], transform: [{ op: 'coalesce' }] },
+                { to: 'image_url', from: 'control_images', transform: [{ op: 'pick', index: 0 }] },
+                { to: 'aspect_ratio', from: 'aspect_ratio', transform: [{ op: 'default', value: '1:1' }] },
+            ]
+        }
+    },
+]
+const bltcy_nano_banana_model: ModelSeriesSetting[] = [
+    {
+        id: "bltcy-nano-banana-2",
+        label: "Nano-banana 2 (Pro)",
+        description: "Gemini-powered image generation via bltcy.ai",
+        supportedAspectRatios: ["1:1", "2:3", "3:2", "16:9", "9:16", "4:3", "3:4", "4:5", "5:4", "21:9"],
+        tag: ["Text to Image"],
+        badge: [],
+        type: 'image',
+        provider: ['bltcy'],
+        useCredits: 0,
+        apiInput: {
+            provider: 'bltcy',
+            endpoint: '/v1/images/generations',
+            rules: [
+                { to: 'model', const: 'nano-banana-2' },
+                { to: 'prompt', from: ['prompt_process', 'prompt'], transform: [{ op: 'coalesce' }] },
+                { to: 'aspect_ratio', from: 'aspect_ratio' },
+                { to: 'response_format', const: 'url' },
+            ]
+        }
+    },
+    {
+        id: "bltcy-nano-banana-2-edit",
+        label: "Nano-banana 2 Edit",
+        description: "Edit images with Gemini via bltcy.ai",
+        tag: ["Image to Image"],
+        badge: ["Image Edit"],
+        type: 'image',
+        provider: ['bltcy'],
+        useCredits: 0,
+        supportAddFiles: [
+            {
+                name: "control_images",
+                label: "Reference Image",
+                type: "image",
+                isRequired: true,
+                isSupport: 1,
+            },
+        ],
+        apiInput: {
+            provider: 'bltcy',
+            endpoint: '/v1/images/edits',
+            rules: [
+                { to: 'model', const: 'nano-banana-2' },
+                { to: 'prompt', from: ['prompt_process', 'prompt'], transform: [{ op: 'coalesce' }] },
+                { to: 'image', from: 'control_images', transform: [{ op: 'pick', index: 0 }] },
+            ]
+        }
+    },
+]
+
 const image_utils_series_model: ModelSeriesSetting[] = [
     {
         id: "image-remove-bg-imageutils",
@@ -2358,6 +2524,9 @@ export const all_image_model: ModelSeriesSetting[] = [
     ...qwen_series_image_model,
     ...character_series_image_model,
     ...other_series_image_model,
+    ...midjourney_series_image_model,
+    ...seedream_series_image_model,
+    ...bltcy_nano_banana_model,
 ]
 export const all_video_model: ModelSeriesSetting[] = [
     ...alibaba_wan_series_video_model,
@@ -2395,7 +2564,10 @@ const hot_model_id = [
     "wan2-2-turbo-image2video",
     "flux-krea-dev",
     "flux-dev-kontext-image-edit",
-    "qwen-image-edit","flux-dev-pulid"
+    "qwen-image-edit","flux-dev-pulid",
+    "midjourney-fast",
+    "seedream-text2img",
+    "bltcy-nano-banana-2",
 ]
 const hot_series_model: ModelSeriesSetting[] = hot_model_id
     .map((modelId) => all_models.find((model) => model.id === modelId))
@@ -2411,6 +2583,9 @@ export const common_model_serise_setting: Record<string, ModelSeriesSetting[]> =
     "character": character_series_image_model,
     "image tool": image_utils_series_model,
     "other": other_series_image_model,
+    "midjourney": midjourney_series_image_model,
+    "seedream": seedream_series_image_model,
+    "bltcy": bltcy_nano_banana_model,
     "image to video": image_to_video_model,
     "text to video": text_to_video_model,
     "avatar video": avatar_series_video_model,
@@ -2424,6 +2599,9 @@ export const func_model_serise_setting: Record<string, ModelSeriesSetting[]> = {
     "text to video": text_to_video_model,
     "image to video": image_to_video_model,
     "avatar video (lipsync)": avatar_series_video_model,
+    "midjourney": midjourney_series_image_model,
+    "seedream": seedream_series_image_model,
+    "bltcy": bltcy_nano_banana_model,
 };
 export const func_video_model_serise_setting: Record<string, ModelSeriesSetting[]> = {
 

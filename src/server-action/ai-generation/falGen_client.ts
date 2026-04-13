@@ -120,3 +120,55 @@ export const handleFalGeneration = async (data: any, webhook_url = '', customApi
         }
     }
 }
+
+// =============================================================================
+// bltcy Nano-banana (OpenAI-compatible image generation)
+// =============================================================================
+export async function handleBltcyGeneration(
+    data: any,
+    customApiKey: string,
+    baseUrl: string = 'https://api.bltcy.ai'
+) {
+    const { model_id } = data;
+    const setting = findSettingByModelId(model_id);
+
+    if (!setting?.apiInput?.endpoint) {
+        return { success: false, data: null, error: "Unsupported model" };
+    }
+
+    const endpoint = setting.apiInput.endpoint;
+    const input = buildApiInput(setting.apiInput, data);
+
+    try {
+        const response = await fetch(`${baseUrl}${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${customApiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(input)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return { success: false, data: null, error: result.error?.message || 'API error' };
+        }
+
+        // Extract image URL from OpenAI-compatible response
+        let imageUrl = null;
+        if (result.data && result.data[0]?.url) {
+            imageUrl = result.data[0].url;
+        } else if (result.data && result.data[0]?.b64_json) {
+            imageUrl = `data:image/png;base64,${result.data[0].b64_json}`;
+        }
+
+        if (imageUrl) {
+            return { success: true, data: { images: [{ url: imageUrl }] }, error: null };
+        }
+
+        return { success: false, data: null, error: 'No image in response' };
+    } catch (error: any) {
+        return { success: false, data: null, error: error.message };
+    }
+}
